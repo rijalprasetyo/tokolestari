@@ -178,7 +178,9 @@
             border-radius: 4px;
             font-size: 0.85rem;
             color: #475569;
+            display: inline-block;
         }
+        .waktu-text { font-size: 0.85rem; color: var(--text-muted); }
         .aksi-kolom { white-space: nowrap; text-align: right; }
         .btn-edit { background-color: var(--warning); color: white; padding: 6px 12px; font-size: 0.85rem; margin-right: 5px; }
         .btn-edit:hover { background-color: var(--warning-hover); }
@@ -233,17 +235,9 @@
 
         /* Kalkulator */
         .kalkulator-layar {
-            background-color: #1e293b;
-            color: #10b981; 
-            font-size: 2rem;
-            text-align: right;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            min-height: 75px;
-            word-wrap: break-word;
-            font-family: monospace;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            background-color: #1e293b; color: #10b981; font-size: 2rem; text-align: right;
+            padding: 20px; border-radius: 12px; margin-bottom: 20px; min-height: 75px;
+            word-wrap: break-word; font-family: monospace; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
         .kalkulator-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .btn-kal {
@@ -253,38 +247,55 @@
         .btn-kal:active { transform: scale(0.95); }
         .btn-kal.operator { background-color: #e2e8f0; color: var(--primary); font-weight: bold; }
         .btn-kal.clear { background-color: #fef2f2; color: var(--danger); font-weight: bold;}
-        .btn-kal.samadengan { background-color: var(--primary); color: white; grid-column: span 2; }
+        .btn-kal.samadengan { background-color: var(--primary); color: white; grid-column: span 4; } /* Diubah menjadi span 4 (memanjang penuh) */
 
+        /* --- OPTIMALISASI MOBILE: FLAT LIST --- */
         @media screen and (max-width: 600px) {
             .top-controls { flex-direction: column; align-items: stretch; }
             .search-filter-group { flex-direction: column; }
             .action-group { flex-direction: column; width: 100%; }
             .btn-tambah, .btn-kalkulator { width: 100%; text-align: center; padding: 14px; }
             
-            .table-container { background-color: transparent; box-shadow: none; }
+            .table-container { 
+                background-color: var(--card-bg); 
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+                border-radius: 12px;
+                padding: 10px;
+            }
+            
             table, thead, tbody, th, td, tr { display: block; }
             thead tr { display: none; }
             
             tr {
-                background-color: var(--card-bg); margin-bottom: 15px; border-radius: 12px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 18px; display: grid;
+                background-color: transparent; 
+                margin-bottom: 0; 
+                border-radius: 0;
+                box-shadow: none; 
+                border-bottom: 1px solid var(--border-color); 
+                padding: 16px 5px; 
+                display: grid;
                 grid-template-columns: 1fr auto;
                 grid-template-areas: 
-                    "nama nama"
+                    "nama waktu"
                     "kategori satuan"
                     "harga harga"
-                    "aksi aksi"; gap: 8px;
+                    "aksi aksi"; 
+                gap: 8px;
+                align-items: center;
             }
+            tr:last-child { border-bottom: none; } 
+            
             td { border: none; padding: 0; text-align: left; }
             td::before { display: none; }
             
-            .col-nama { grid-area: nama; font-size: 1.15rem; color: var(--text-main); margin-bottom: 5px; }
+            .col-nama { grid-area: nama; font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+            .col-waktu { grid-area: waktu; text-align: right; font-size: 0.75rem; color: var(--text-muted); }
             .col-kategori { grid-area: kategori; }
-            .col-satuan { grid-area: satuan; text-align: right; color: var(--text-muted); font-size: 0.9rem; align-self: center; }
+            .col-satuan { grid-area: satuan; text-align: right; color: var(--text-muted); font-size: 0.9rem; }
             .col-satuan::before { content: "Per "; display: inline; font-weight: normal; color: var(--text-muted); }
-            .col-harga { grid-area: harga; font-size: 1.3rem; margin-top: 8px; margin-bottom: 12px; }
-            .col-aksi { grid-area: aksi; display: flex; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px; }
-            .col-aksi button { flex: 1; margin: 0; padding: 10px; font-size: 0.9rem; }
+            .col-harga { grid-area: harga; font-size: 1.25rem; padding-top: 4px; padding-bottom: 4px; }
+            .col-aksi { grid-area: aksi; display: flex; gap: 8px; margin-top: 5px; }
+            .col-aksi button { flex: 1; margin: 0; padding: 10px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -329,12 +340,13 @@
                         <th>Kategori</th>
                         <th>Harga</th>
                         <th>Satuan</th>
+                        <th>Update Terakhir</th>
                         <th style="text-align: right;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tabel-body">
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px;">Memuat data...</td>
+                        <td colspan="6" style="text-align: center; padding: 30px;">Memuat data...</td>
                     </tr>
                 </tbody>
             </table>
@@ -394,9 +406,7 @@
                 <h3>Kalkulator Toko</h3>
                 <button class="close-btn" onclick="tutupModalKalkulator()">&times;</button>
             </div>
-            
             <div class="kalkulator-layar" id="layarKalkulator">0</div>
-            
             <div class="kalkulator-grid">
                 <button class="btn-kal clear" onclick="kalBersih()">C</button>
                 <button class="btn-kal clear" onclick="kalHapusSatu()">DEL</button>
@@ -418,9 +428,11 @@
                 <button class="btn-kal" onclick="kalInput('3')">3</button>
                 <button class="btn-kal operator" onclick="kalInput('+')">+</button>
                 
-                <button class="btn-kal" onclick="kalInput('00')">00</button>
                 <button class="btn-kal" onclick="kalInput('0')">0</button>
+                <button class="btn-kal" onclick="kalInput('00')">00</button>
+                <button class="btn-kal" onclick="kalInput('000')">000</button>
                 <button class="btn-kal" onclick="kalInput(',')">,</button>
+                
                 <button class="btn-kal samadengan" onclick="kalHitung()">=</button>
             </div>
         </div>
@@ -432,6 +444,19 @@
         
         const modalBarang = document.getElementById("modalBarang");
         const modalKalkulator = document.getElementById("modalKalkulator");
+
+        function dapatkanWaktuSekarang() {
+            const now = new Date();
+            const opsi = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            };
+            return now.toLocaleDateString('id-ID', opsi).replace(/\./g, ':');
+        }
 
         function bukaModalTambah() {
             editId = null;
@@ -448,7 +473,7 @@
 
         function bukaModalKalkulator() {
             modalKalkulator.style.display = "block";
-            kalBersih(); 
+            updateLayarKalkulator(); // Memanggil update layar agar data terakhir tetap muncul, kalBersih() dihapus
         }
         function tutupModalKalkulator() {
             modalKalkulator.style.display = "none";
@@ -459,42 +484,31 @@
             if (event.target == modalKalkulator) { tutupModalKalkulator(); }
         }
 
-        // --- LOGIKA KALKULATOR DENGAN TITIK (PEMISAH RIBUAN) ---
+        // --- LOGIKA KALKULATOR ---
         const layarKalkulator = document.getElementById("layarKalkulator");
-        let ekspresiKalkulator = ""; // Menyimpan angka asli untuk dihitung
+        let ekspresiKalkulator = "";
 
         function updateLayarKalkulator() {
             if (ekspresiKalkulator === "") {
                 layarKalkulator.innerText = "0";
                 return;
             }
-            
             let tampil = ekspresiKalkulator;
-            
-            // Ubah simbol perkalian dan pembagian agar cantik di layar
             tampil = tampil.replace(/\*/g, '×').replace(/\//g, '÷');
-            
-            // Format titik pada angka (menggunakan Regex untuk memisahkan angka dari simbol)
             tampil = tampil.replace(/\d+/g, function(match) {
                 return parseInt(match, 10).toLocaleString('id-ID');
             });
-            
             layarKalkulator.innerText = tampil;
         }
 
         function kalInput(nilai) {
             const operator = ['+', '-', '*', '/', '%'];
-            
-            // Cegah mengetik operator di awal (kecuali minus)
             if (ekspresiKalkulator === "" && operator.includes(nilai) && nilai !== '-') return;
-            
-            // Ganti operator jika ditekan dua kali berturut-turut
             if (operator.includes(nilai) && operator.includes(ekspresiKalkulator.slice(-1))) {
                 ekspresiKalkulator = ekspresiKalkulator.slice(0, -1) + nilai;
             } else {
                 ekspresiKalkulator += nilai;
             }
-            
             updateLayarKalkulator();
         }
         
@@ -513,19 +527,12 @@
         function kalHitung() {
             if (!ekspresiKalkulator) return;
             try {
-                // Konversi persen dan ubah koma menjadi titik agar Javascript bisa menghitungnya
                 let evalString = ekspresiKalkulator.replace(/%/g, '/100').replace(/,/g, '.');
-                
                 let hasil = eval(evalString);
-                
-                // Batasi desimal yang panjang
                 if (!Number.isInteger(hasil)) {
                     hasil = parseFloat(hasil.toFixed(4));
                 }
-                
-                // Ubah kembali jadi string dan kembalikan koma desimal Indonesia
                 ekspresiKalkulator = hasil.toString().replace(/\./g, ',');
-                
                 updateLayarKalkulator();
             } catch (error) {
                 layarKalkulator.innerText = "Error";
@@ -551,31 +558,56 @@
                 tabelBody.innerHTML = ""; 
 
                 if (data && Object.keys(data).length > 0) {
+                    let arrayData = [];
+
                     for (let id in data) {
                         let barang = data[id];
+                        
+                        if (!barang.waktu_update || !barang.timestamp) {
+                            barang.waktu_update = dapatkanWaktuSekarang();
+                            barang.timestamp = Date.now(); 
+                            
+                            fetch(`${baseURL}/${id}.json`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ 
+                                    waktu_update: barang.waktu_update,
+                                    timestamp: barang.timestamp
+                                })
+                            }).catch(err => console.log("Gagal auto-update waktu:", err));
+                        }
+                        
+                        arrayData.push({ id: id, ...barang });
+                    }
+
+                    arrayData.sort((a, b) => b.timestamp - a.timestamp);
+
+                    for (let barang of arrayData) {
                         let kategoriTampil = barang.kategori ? barang.kategori : "-";
+                        let waktuTampil = barang.waktu_update;
                         
                         let baris = `
                             <tr>
-                                <td class="col-nama"><strong>${barang.nama}</strong></td>
+                                <td class="col-nama"><span>${barang.nama}</span></td>
                                 <td class="col-kategori"><span class="kategori-badge">${kategoriTampil}</span></td>
                                 <td class="col-harga harga-text">Rp ${parseInt(barang.harga).toLocaleString('id-ID')}</td>
                                 <td class="col-satuan">${barang.satuan}</td>
+                                <td class="col-waktu"><span class="waktu-text">🕒 ${waktuTampil}</span></td>
                                 <td class="aksi-kolom col-aksi">
-                                    <button class="btn-edit" onclick="siapkanEdit('${id}', '${barang.nama}', '${barang.kategori || ''}', '${barang.harga}', '${barang.satuan}')">Edit</button>
-                                    <button class="btn-hapus" onclick="hapusData('${id}')">Hapus</button>
+                                    <button class="btn-edit" onclick="siapkanEdit('${barang.id}', '${barang.nama}', '${barang.kategori || ''}', '${barang.harga}', '${barang.satuan}')">Edit</button>
+                                    <button class="btn-hapus" onclick="hapusData('${barang.id}')">Hapus</button>
                                 </td>
                             </tr>
                         `;
                         tabelBody.innerHTML += baris;
                     }
                 } else {
-                    tabelBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data barang di Toko Lestari.</td></tr>`;
+                    tabelBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: #64748b;">Belum ada data barang di Toko Lestari.</td></tr>`;
                 }
                 cariBarang();
             } catch (error) {
                 console.error("Gagal memuat data:", error);
-                tabelBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #e11d48; padding: 30px;">Gagal terhubung ke database server.</td></tr>`;
+                tabelBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #e11d48; padding: 30px;">Gagal terhubung ke database server.</td></tr>`;
             }
         }
 
@@ -591,7 +623,15 @@
             }
 
             const hargaAngka = inputHargaTeks.replace(/\./g, '');
-            const dataBarang = { nama: nama, kategori: kategori, harga: hargaAngka, satuan: satuan };
+            
+            const dataBarang = { 
+                nama: nama, 
+                kategori: kategori, 
+                harga: hargaAngka, 
+                satuan: satuan,
+                waktu_update: dapatkanWaktuSekarang(),
+                timestamp: Date.now() 
+            };
 
             const btnSimpan = document.getElementById("btnSimpan");
             const teksAsli = btnSimpan.innerText;
@@ -613,7 +653,7 @@
                     });
                 }
                 tutupModal();
-                muatData();
+                muatData(); 
             } catch (error) {
                 console.error("Gagal menyimpan:", error);
                 alert("Terjadi kesalahan sistem saat menyimpan.");
